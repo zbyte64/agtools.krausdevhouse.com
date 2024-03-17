@@ -76,7 +76,7 @@ def process_cimis_spatial_date(date):
     engine = create_engine(os.environ["DATABASE_URL"])
     logger.info(f"Writing CIMIS [${date}] to database with columns ${df.columns}")
     # TODO squash by date
-    df.to_postgis("cimis_spacetime", engine, if_exists="replace")
+    df.to_postgis("cimis_daily_points", engine, if_exists="append")
 
 
 if __name__ == "__main__":
