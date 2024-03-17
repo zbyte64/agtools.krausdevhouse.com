@@ -1,0 +1,16 @@
+maya
+pandas
+numpy
+xlrd
+pyproj
+GDAL[numpy]==3.6.4
+georasters
+fastapi 
+uvicorn 
+alembic 
+sqlalchemy 
+geoalchemy2 
+asyncpg 
+alembic 
+pydantic-extra-types
+psycopg2

@@ -1,0 +1,9 @@
+*.swp
+*~
+*.env
+*.py[cdo]
+**/.pytest_cache
+**/__pycache__
+**/.venv
+/datasets
+.git
