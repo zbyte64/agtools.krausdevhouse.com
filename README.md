@@ -7,4 +7,4 @@ Installing
 
 Running
 -------
-`docker compose run web python agtools/download_cimis_spatial.py`
+`docker compose run web python -m agtools.download_cimis_spatial`

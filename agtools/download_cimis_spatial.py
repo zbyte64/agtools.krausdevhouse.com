@@ -3,17 +3,16 @@ import georasters as gr
 import tempfile
 import requests
 import gzip
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, delete
+from sqlalchemy.orm import Session
 import os
 from pyproj import Transformer
 from shapely.ops import transform
-import logging
 
+from agtools.logger import getLogger
+from agtools.models import CIMISDailyPoints
 
-# TODO configure this elsewhere
-logging.basicConfig(level=logging.DEBUG)
-
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 DATASETS_PATH = os.environ.get("DATASETS_PATH", "./datasets")
 
@@ -75,8 +74,13 @@ def process_cimis_spatial_date(date):
     df = read_cimis_spatial_date(date)
     engine = create_engine(os.environ["DATABASE_URL"])
     logger.info(f"Writing CIMIS [${date}] to database with columns ${df.columns}")
-    # TODO squash by date
-    df.to_postgis("cimis_daily_points", engine, if_exists="append")
+    # squash by date
+    stmt = delete(CIMISDailyPoints).where(CIMISDailyPoints.date == date)
+    # TODO reuse session if we can to make one transaction
+    with Session(engine) as session:
+        session.execute(stmt)
+        session.commit()
+    df.to_postgis(CIMISDailyPoints.__tablename__, engine, if_exists="append")
 
 
 if __name__ == "__main__":
