@@ -15,11 +15,13 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-DATASETS_PATH = os.environ.get("DATASETS_PATH", './datasets')
+DATASETS_PATH = os.environ.get("DATASETS_PATH", "./datasets")
 
 project = Transformer.from_crs("EPSG:3310", "EPSG:4326").transform
 
-local_eto_path = lambda date: f"{DATASETS_PATH}/cimis-spatial/{date.strftime('%Y/%m/%d')}/Eto.asc.gz"
+local_eto_path = (
+    lambda date: f"{DATASETS_PATH}/cimis-spatial/{date.strftime('%Y/%m/%d')}/Eto.asc.gz"
+)
 
 
 def download_cimis_spatial_date(date, check_for_existing=True):
@@ -30,7 +32,7 @@ def download_cimis_spatial_date(date, check_for_existing=True):
     if check_for_existing and os.path.exists(write_to_path):
         return
     subpath = date.strftime("%Y/%m/%d")
-    logger.info(f'Downloading CIMIS for ${subpath}')
+    logger.info(f"Downloading CIMIS for ${subpath}")
 
     location = "https://spatialcimis.water.ca.gov/cimis/{subpath}/ETo.asc.gz".format(
         subpath=subpath
@@ -39,7 +41,7 @@ def download_cimis_spatial_date(date, check_for_existing=True):
     response = requests.get(location)
     response.raise_for_status()
     os.makedirs(os.path.dirname(write_to_path), exist_ok=True)
-    with open(write_to_path, mode='wb') as fp:
+    with open(write_to_path, mode="wb") as fp:
         fp.write(response.content)
         fp.close()
 
@@ -50,7 +52,7 @@ def read_cimis_spatial_date(date):
     Reads for a date, returns a pandas dataframe of ETo values with lat lng
     """
     read_path = local_eto_path(date)
-    content = gzip.GzipFile(fileobj=open(read_path, 'rb'), mode="r").read()
+    content = gzip.GzipFile(fileobj=open(read_path, "rb"), mode="r").read()
     with tempfile.TemporaryDirectory() as tmpdirname:
         fname = os.path.join(tmpdirname, "Eto.asc")
         fp = open(fname, "wb")
@@ -64,17 +66,17 @@ def read_cimis_spatial_date(date):
     # we only care about centroids
     # reproject geometry to lat lng
     df["geometry"] = df["geometry"].values.map(lambda x: transform(project, x.centroid))
-    # import code; code.interact(local=locals()) 
+    # import code; code.interact(local=locals())
     return df
 
 
 def process_cimis_spatial_date(date):
     download_cimis_spatial_date(date)
     df = read_cimis_spatial_date(date)
-    engine = create_engine(os.environ['DATABASE_URL'])
-    logger.info(f'Writing CIMIS [${date}] to database with columns ${df.columns}')
+    engine = create_engine(os.environ["DATABASE_URL"])
+    logger.info(f"Writing CIMIS [${date}] to database with columns ${df.columns}")
     # TODO squash by date
-    df.to_postgis("cimis_spacetime", engine, if_exists='replace')
+    df.to_postgis("cimis_spacetime", engine, if_exists="replace")
 
 
 if __name__ == "__main__":
