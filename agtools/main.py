@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 from fastapi import Depends, FastAPI, HTTPException, status
 
-# from geoalchemy2 import Geometry
 from geoalchemy2.functions import (
     ST_Distance,
     ST_GeographyFromText,
@@ -29,7 +28,10 @@ async def get_historical_eto(
     start_date: date,
     num_of_days: int,
     db_session: AsyncSession = Depends(get_async_session),
-):
+) -> float:
+    """
+    Returns the sum total ETo accross days for a point, unit is in inches
+    """
     if num_of_days < 1:
         raise HTTPException(
             status=status.HTTP_400_BAD_REQUEST,
