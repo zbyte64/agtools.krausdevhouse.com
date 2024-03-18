@@ -3,7 +3,7 @@ version: "3.8"
 services:
   web:
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile
     container_name: agtools-backend
     ports:
@@ -13,9 +13,11 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
       ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/postgres
+      DATASETS_PATH: /usr/datasets
     command: uvicorn agtools.main:app --host=0.0.0.0 --port=8000 --reload 
     volumes:
-      - ./:/usr/src
+      - ./api:/usr/src
+      - ./datasets:/usr/datasets
 
   db:
     image: postgis/postgis:15-3.4-alpine
