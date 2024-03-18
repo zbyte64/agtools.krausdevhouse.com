@@ -39,6 +39,7 @@ async def get_historical_eto(
         )
     end_date = start_date + timedelta(days=num_of_days)
     # assumes the geometry points are stable through time
+    # TODO we could select distinct by date to make this safer
     daily_values = (
         select(CIMISDailyPoints.value_inches)
         .where(
